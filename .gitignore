@@ -1,33 +1,14 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
+# Ignore local virtual environments
 venv/
-.venv/
 pms_env/
+env/
 
-# Environment variables
-.env
-.env.*
+# Ignore local databases
+*.sqlite3
 
-# Jupyter
-.ipynb_checkpoints/
+# Ignore automatically generated static files folder
+staticfiles/
 
-# IDE
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Build
-build/
-dist/
+# Ignore Python cache files
+__pycache__/
+*.pyc
