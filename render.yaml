@@ -6,11 +6,11 @@ services:
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
       python manage.py migrate
+    # FIX: Explicitly use pms_project instead of app
     startCommand: gunicorn pms_project.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
-      # Render will automatically generate a highly secure random key for your live website
       - key: DJANGO_SECRET_KEY
         generateValue: true 
     disk:
