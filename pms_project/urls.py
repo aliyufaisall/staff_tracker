@@ -30,6 +30,8 @@ urlpatterns = [
     path('assignment/delete/<int:task_id>/', views.delete_assignment, name='delete_assignment'),
     # Add this path inside the urlpatterns list in pms_project/urls.py:
     path('accounts/register/', views.register, name='register'),
+    # Add this line inside your urlpatterns list:
+    path('assignment/edit/<int:task_id>/', views.edit_assignment, name='edit_assignment'),
 
 ]
 

@@ -4,6 +4,10 @@ from .models import Staff
 from .models import Assignment
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Assignment
+from datetime import datetime
 
 
 @login_required
@@ -93,4 +97,37 @@ def register(request):
         form = UserCreationForm()
     
     return render(request, 'registration/register.html', {'form': form})
+
+
+@login_required
+def edit_assignment(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(Assignment, id=task_id, staff__created_by=request.user)
+        
+        # Update details from form inputs
+        task.title = request.POST.get('title', '').strip()
+        task.time_given = request.POST.get('time_given') or None
+        task.time_delivered = request.POST.get('time_delivered') or None
+        task.expected_delivery = request.POST.get('expected_delivery') or None
+        task.date_delivered = request.POST.get('date_delivered') or None
+        
+        # Automatically recalculate status based on the updated info
+        if task.date_delivered and task.expected_delivery:
+            exp_date = datetime.strptime(str(task.expected_delivery), '%Y-%m-%d').date()
+            del_date = datetime.strptime(str(task.date_delivered), '%Y-%m-%d').date()
+            if del_date > exp_date:
+                task.status = 'LATE'
+            else:
+                task.status = 'ON_TIME'
+        elif task.date_delivered:
+            task.status = 'ON_TIME'
+        else:
+            task.status = 'IN_PROGRESS'
+            
+        if task.title:
+            task.save()
+            
+        return redirect('staff_profile', staff_id=task.staff.id)
+    return redirect('dashboard')
+
 

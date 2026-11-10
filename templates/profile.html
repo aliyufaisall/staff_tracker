@@ -155,15 +155,29 @@
                         <span class="status-pill status-progress">In Progress</span>
                     {% endif %}
                 </td>
-                <td style="text-align: center; vertical-align: middle;">
-                    <form action="{% url 'delete_assignment' task.id %}" method="POST" style="margin: 0; display: inline-block;">
+                <!-- Replace your current row actions <td> with this version: -->
+                <td style="text-align: center; vertical-align: middle; white-space: nowrap; gap: 8px; display: flex; justify-content: center; align-items: center;">
+                    <!-- Data attributes prevent quote conflicts entirely -->
+                    <button type="button" class="btn-row-edit" 
+                            style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px;"
+                            data-id="{{ task.id }}"
+                            data-title="{{ task.title }}"
+                            data-time-given="{{ task.time_given|time:'H:i' }}"
+                            data-time-delivered="{{ task.time_delivered|time:'H:i' }}"
+                            data-expected="{{ task.expected_delivery|date:'Y-m-d' }}"
+                            data-delivered="{{ task.date_delivered|date:'Y-m-d' }}"
+                            onclick="handleEditClick(this)">
+                        ✏️
+                    </button>
+
+                    <form action="{% url 'delete_assignment' task.id %}" method="POST" style="margin: 0; display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
                         {% csrf_token %}
-                        <!-- Using a native system text emoji symbol instead of a font icon -->
-                        <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
+                        <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px;">
                             🗑️
                         </button>
                     </form>
                 </td>
+
 
 
             </tr>
@@ -177,73 +191,83 @@
     </table>
 </div>
 
-<!-- ================= MODAL OVERLAY INTERFACE ================= -->
-<div class="modal-overlay" id="assignmentModal">
+<!-- ================= EDIT MODAL OVERLAY INTERFACE ================= -->
+<div class="modal-overlay" id="editAssignmentModal">
     <div class="modal-card">
-        <button class="modal-close" id="closeModalCross"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" type="button" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
         
         <div class="modal-header">
-            <h2>Create New Assignment</h2>
-            <p>Assign task for <span>{{ staff.name }}</span></p>
+            <h2>Edit Assignment</h2>
+            <p>Update tracking details for this assignment</p>
         </div>
         
-        <form class="modal-form" method="POST" action="{% url 'staff_profile' staff.id %}">
+        <form class="modal-form" id="editForm" method="POST" action="">
             {% csrf_token %}
             
             <div class="field-group">
                 <label>Assignment Name *</label>
-                <input type="text" name="title" class="form-input" placeholder="e.g. Q3 Financial Performance Report" required>
+                <input type="text" name="title" id="edit_title" class="form-input" required>
             </div>
             
             <div class="form-row">
-                <!-- Fixed missing field-group wrap block here -->
                 <div class="field-group">
                     <label>Time Given *</label>
-                    <input type="time" name="time_given" class="form-input" required>
+                    <input type="time" name="time_given" id="edit_time_given" class="form-input" required>
                 </div>
                 <div class="field-group">
                     <label>Time Delivered (Optional)</label>
-                    <input type="time" name="time_delivered" class="form-input">
+                    <input type="time" name="time_delivered" id="edit_time_delivered" class="form-input">
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="field-group">
                     <label>Expected Date of Delivery *</label>
-                    <input type="date" name="expected_delivery" class="form-input" required>
+                    <input type="date" name="expected_delivery" id="edit_expected_delivery" class="form-input" required>
                 </div>
                 <div class="field-group">
                     <label>Date of Delivery (Optional)</label>
-                    <input type="date" name="date_delivered" class="form-input">
+                    <input type="date" name="date_delivered" id="edit_date_delivered" class="form-input">
                 </div>
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
-                <button type="submit" class="btn-save">Save Assignment</button>
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn-save">Update Assignment</button>
             </div>
         </form>
     </div>
 </div>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const modal = document.getElementById("assignmentModal");
-        const openBtn = document.getElementById("openModalBtn");
-        const closeCross = document.getElementById("closeModalCross");
-        const closeBtn = document.getElementById("closeModalBtn");
+    // Keep your original Create Modal events here unchanged...
 
-        if (openBtn && modal) {
-            openBtn.addEventListener("click", () => modal.style.display = "flex");
-            
-            const closeModal = () => modal.style.display = "none";
-            if (closeCross) closeCross.addEventListener("click", closeModal);
-            if (closeBtn) closeBtn.addEventListener("click", closeModal);
-            
-            window.addEventListener("click", (e) => {
-                if (e.target === modal) closeModal();
-            });
-        }
+    const editModal = document.getElementById("editAssignmentModal");
+    const editForm = document.getElementById("editForm");
+
+    function handleEditClick(button) {
+        // Pull properties directly from the HTML element tags safely
+        const id = button.getAttribute("data-id");
+        
+        // Dynamically point form action to the matching backend route url
+        editForm.action = `/assignment/edit/${id}/`;
+        
+        // Safely map form variables into modal inputs without syntax breaks
+        document.getElementById("edit_title").value = button.getAttribute("data-title");
+        document.getElementById("edit_time_given").value = button.getAttribute("data-time-given") || "";
+        document.getElementById("edit_time_delivered").value = button.getAttribute("data-time-delivered") || "";
+        document.getElementById("edit_expected_delivery").value = button.getAttribute("data-expected") || "";
+        document.getElementById("edit_date_delivered").value = button.getAttribute("data-delivered") || "";
+        
+        editModal.style.display = "flex";
+    }
+
+    function closeEditModal() {
+        editModal.style.display = "none";
+    }
+
+    window.addEventListener("click", (e) => {
+        if (e.target === editModal) closeEditModal();
     });
 </script>
+
 {% endblock %}
