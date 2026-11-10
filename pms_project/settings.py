@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,20 +75,14 @@ WSGI_APPLICATION = 'pms_project.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 # 3. Configure the database path to live on Render's persistent disk
 # Render attaches persistent disks to a folder named /data
-if not DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/data/db.sqlite3',  # <-- This lives securely on the attached cloud disk
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3"),
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=bool(os.getenv("DATABASE_URL")),
+    )
+}
 
 
 
