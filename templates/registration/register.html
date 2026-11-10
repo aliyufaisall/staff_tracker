@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Staff Performance</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #fafbfc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .register-card { background: #ffffff; width: 440px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); border: 1px solid #f0f2f5; text-align: center; }
+        h2 { font-size: 24px; font-weight: 600; color: #111827; margin-bottom: 8px; }
+        .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        /* Style the Django forms inputs neatly */
+        .form-group input { width: 100%; padding: 12px 14px; font-size: 14px; border: 1px solid #e5e7eb; border-radius: 10px; background-color: #f9fafb; color: #1f2937; outline: none; }
+        .form-group input:focus { border-color: #00966c; background-color: #ffffff; }
+        .helptext { display: block; font-size: 11px; color: #9ca3af; margin-top: 4px; line-height: 1.4; }
+        .errorlist { color: #dc2626; font-size: 12px; margin-bottom: 10px; list-style: none; text-align: left; padding-left: 0; }
+        .btn-register { width: 100%; padding: 14px; background-color: #00966c; color: #ffffff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 12px rgba(0, 150, 108, 0.2); }
+        .btn-register:hover { background-color: #007d5a; }
+        .footer-link { margin-top: 24px; font-size: 13px; color: #6b7280; }
+        .footer-link a { color: #00966c; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="register-card">
+    <h2>Create Account</h2>
+    <p class="subtitle">Register a new manager profile to access the tracker</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Loop over Django's built-in user registration fields -->
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {% if field.errors %}
+                    <ul class="errorlist">{{ field.errors }}</ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn-register">Sign Up</button>
+    </form>
+    
+    <div class="footer-link">
+        Already have an account? <a href="{% url 'login' %}">Sign In</a>
+    </div>
+</div>
+
+</body>
+</html>

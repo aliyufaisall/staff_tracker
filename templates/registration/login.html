@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Back - Staff Performance</title>
+    <!-- Adding Google Fonts (Inter) and FontAwesome for the input icons -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #fafbfc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .login-card { background: #ffffff; width: 440px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); text-align: center; border: 1px solid #f0f2f5; position: relative; }
+        
+        .icon-container { background-color: #e6f7f0; width: 64px; height: 64px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 24px auto; }
+        .icon-container i { color: #00966c; font-size: 24px; }
+        
+        h2 { font-size: 24px; font-weight: 600; color: #111827; margin-bottom: 8px; }
+        .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+        
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper i.prefix-icon { position: absolute; left: 14px; color: #9ca3af; font-size: 16px; }
+        
+        /* Targets Django's automatically generated form input elements */
+        .input-wrapper input { width: 100%; padding: 12px 14px 12px 42px; font-size: 14px; border: 1px solid #e5e7eb; border-radius: 10px; background-color: #f9fafb; color: #1f2937; outline: none; transition: border-color 0.2s, background-color 0.2s; }
+        .input-wrapper input:focus { border-color: #00966c; background-color: #ffffff; }
+        
+        .input-wrapper .toggle-password { position: absolute; right: 14px; color: #9ca3af; cursor: pointer; font-size: 16px; }
+        
+        .btn-signin { width: 100%; padding: 14px; background-color: #00966c; color: #ffffff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 12px rgba(0, 150, 108, 0.2); transition: background-color 0.2s; }
+        .btn-signin:hover { background-color: #007d5a; }
+        
+        .error-msg { background-color: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; text-align: left; }
+        
+        /* Small styling matching the down arrow anchor accent in the image */
+        .bottom-arrow { width: 36px; height: 36px; background-color: #111827; color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; position: absolute; bottom: -18px; left: calc(50% - 18px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .bottom-arrow i { font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="icon-container">
+        <i class="fa-solid fa-lock"></i>
+    </div>
+    
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to manage staff assignments and performance</p>
+    
+    {% if form.errors %}
+        <div class="error-msg">
+            <i class="fa-solid fa-circle-exclamation"></i> Your username and password didn't match.
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            <div class="input-wrapper">
+                <i class="fa-regular fa-user prefix-icon"></i>
+                <!-- We inject the input using Django forms tag -->
+                {{ form.username }}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password">Password</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-lock prefix-icon"></i>
+                {{ form.password }}
+                <i class="fa-regular fa-eye toggle-password" id="togglePassword"></i>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-signin">Sign In</button>
+    </form>
+    <div style="margin-top: 24px; font-size: 13px; color: #6b7280;">
+        Don't have an account? <a href="{% url 'register' %}" style="color: #00966c; text-decoration: none; font-weight: 600;">Sign Up</a>
+    </div>
+
+    
+    <div class="bottom-arrow">
+        <i class="fa-solid fa-arrow-down"></i>
+    </div>
+</div>
+
+<!-- Extra script to handle the placeholders and password visibility toggle cleanly -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const usernameInput = document.getElementById("id_username");
+        const passwordInput = document.getElementById("id_password");
+        
+        if (usernameInput) usernameInput.setAttribute("placeholder", "e.g. admin");
+        if (passwordInput) passwordInput.setAttribute("placeholder", "Enter password...");
+
+        // Password visibility toggle logic
+        const togglePassword = document.getElementById("togglePassword");
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener("click", function() {
+                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+                passwordInput.setAttribute("type", type);
+                this.classList.toggle("fa-eye");
+                this.classList.toggle("fa-eye-slash");
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

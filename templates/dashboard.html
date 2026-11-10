@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Directory - Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .directory-card { background: #ffffff; padding: 40px; border-radius: 20px; border: 1px solid #f0f2f5; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01); }
+    .directory-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .directory-title h2 { font-size: 22px; font-weight: 700; color: #111827; }
+    .directory-title p { font-size: 14px; color: #6b7280; margin-top: 4px; }
+    .counter-badge { background-color: #f3f4f6; color: #374151; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+    
+    .action-bar { display: flex; gap: 16px; margin-bottom: 24px; align-items: center; }
+    .add-staff-form { display: flex; gap: 10px; flex: 1; max-width: 450px; }
+    .input-field { width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 14px; background-color: #ffffff; color: #1f2937; }
+    .input-field::placeholder { color: #9ca3af; }
+    
+    .btn-add { background-color: #00966c; color: white; border: none; padding: 0 20px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .btn-add:hover { background-color: #007d5a; }
+    
+    .search-form { flex: 1; display: flex; }
+    .search-wrapper { position: relative; flex: 1; }
+    .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 16px; }
+    .search-input { width: 100%; padding: 12px 16px 12px 48px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 14px; }
+    
+    .staff-list { display: flex; flex-direction: column; gap: 16px; }
+    .staff-row { border: 1px solid #f0f2f5; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; transition: box-shadow 0.2s; }
+    .staff-row:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    
+    .staff-profile-info { display: flex; align-items: center; gap: 16px; }
+    .avatar-circle { width: 44px; height: 44px; border-radius: 50%; font-size: 14px; font-weight: 600; display: flex; justify-content: center; align-items: center; }
+    
+    .avatar-design-0 { background-color: #e6f7f0; color: #00966c; }
+    .avatar-design-1 { background-color: #f5f0ff; color: #7c3aed; }
+    
+    .staff-details h3 { font-size: 15px; font-weight: 600; color: #111827; }
+    .staff-details p { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    
+    .row-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-profile { color: #4b5563; font-size: 13px; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; }
+    .btn-profile:hover { color: #111827; }
+    .btn-delete { color: #d1d5db; background: none; border: none; cursor: pointer; font-size: 15px; transition: color 0.2s; }
+    .btn-delete:hover { color: #ef4444; }
+    .empty-state { text-align: center; color: #9ca3af; padding: 40px 0; font-size: 14px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="directory-card">
+    <div class="directory-header">
+        <div class="directory-title">
+            <h2>Staff Directory</h2>
+            <p>Select a team member to view performance & assignments</p>
+        </div>
+        <div class="counter-badge">{{ total_staff }}</div>
+    </div>
+    
+    <div class="action-bar">
+        <!-- Add Staff Form -->
+        <form class="add-staff-form" method="POST" action="{% url 'dashboard' %}">
+            {% csrf_token %}
+            <input type="text" name="staff_name" class="input-field" placeholder="Enter staff name..." required>
+            <button type="submit" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+        </form>
+        
+        <!-- Live Search Form -->
+        <form class="search-form" method="GET" action="{% url 'dashboard' %}">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="search" class="search-input" placeholder="Search staff members..." value="{{ search_query }}">
+            </div>
+        </form>
+    </div>
+    
+    <div class="staff-list">
+        {% for staff in staff_members %}
+        <div class="staff-row">
+            <div class="staff-profile-info">
+                <div class="avatar-circle {% if forloop.counter0|divisibleby:2 %}avatar-design-0{% else %}avatar-design-1{% endif %}">
+                    {{ staff.initials }}
+                </div>
+                <div class="staff-details">
+                    <h3>{{ staff.name }}</h3>
+                    <p>{{ staff.assignments.count }} assignment{{ staff.assignments.count|pluralize }}</p>
+                </div>
+            </div>
+            <!-- Locate this section inside your templates/dashboard.html staff loop -->
+            <div class="row-actions">
+                <a href="{% url 'staff_profile' staff.id %}" class="btn-profile">View Profile <i class="fa-solid fa-arrow-right"></i></a>
+                
+                <!-- Secure delete form wrapped around the native trash emoji symbol -->
+                <form action="{% url 'delete_staff' staff.id %}" method="POST" style="margin: 0; display: inline-block;" onsubmit="return confirm('Are you sure you want to remove this staff member?');">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px;">
+                        🗑️
+                    </button>
+                </form>
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fa-regular fa-folder-open" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+            No staff members found matching this criteria.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Debounced Live Search Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.querySelector('.search-input');
+        const searchForm = document.querySelector('.search-form');
+        let timeout = null;
+
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    searchForm.submit();
+                }, 400);
+            });
+
+            // Persist focus state and cursor location on automatic reloads
+            if (searchInput.value !== "") {
+                const val = searchInput.value;
+                searchInput.value = '';
+                searchInput.focus();
+                searchInput.value = val;
+            }
+        }
+    });
+</script>
+{% endblock %}

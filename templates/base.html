@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Staff Tracker{% endblock %}</title>
+    <!-- Professional Google Font & Icon Support -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #fafbfc; color: #111827; padding: 40px 20px; }
+        .wrapper { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
+        
+        /* Shared Header/Navbar Component */
+        .navbar { background: #ffffff; padding: 20px 32px; border-radius: 16px; border: 1px solid #f0f2f5; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01); }
+        .brand-section { display: flex; align-items: center; gap: 16px; }
+        .brand-icon { background-color: #00966c; width: 44px; height: 44px; border-radius: 10px; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; }
+        .brand-text h1 { font-size: 16px; font-weight: 700; color: #111827; }
+        .brand-text p { font-size: 12px; color: #6b7280; margin-top: 2px; }
+        
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-directory { background-color: #f3f4f6; color: #4b5563; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: 8px; text-decoration: none; border: none; }
+        .btn-logout { background-color: #fff5f5; color: #dc2626; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: 8px; text-decoration: none; border: none; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .btn-logout:hover { background-color: #fee2e2; }
+        
+        /* Focus styles for forms */
+        input:focus { outline: none; border-color: #00966c !important; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- Top Navbar Component -->
+        <header class="navbar">
+            <div class="brand-section">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-chart-simple"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Staff Tracker</h1>
+                    <p>Performance & Assignment Manager</p>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <a href="{% url 'dashboard' %}" class="btn-directory">Staff Directory</a>
+                <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Injected Here -->
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+</body>
+</html>
